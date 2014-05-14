@@ -1,0 +1,5 @@
+name: Quake
+version: 1.0
+description: starter quake plugin
+author: Khillynn
+main: com.khillynn.Quake.Quake
