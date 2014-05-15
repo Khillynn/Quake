@@ -1,18 +1,19 @@
 package com.khillynn.quake;
 
 import org.bukkit.*;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.WitherSkull;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 public class Quake extends JavaPlugin implements Listener {
     @Override
@@ -24,6 +25,17 @@ public class Quake extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e){
         Player p = e.getPlayer();
+        e.getPlayer().setExp(1F);
+        if(!p.getInventory().contains(Material.WOOD_HOE))
+        {
+            p.getPlayer().getInventory().setItemInHand(new ItemStack(Material.WOOD_HOE, 1));
+        }
+    }
+
+    @EventHandler
+    public void onPlayerRespawn(PlayerRespawnEvent e){
+        Player p = e.getPlayer();
+        e.getPlayer().setExp(1F);
         if(!p.getInventory().contains(Material.WOOD_HOE))
         {
             p.getPlayer().getInventory().setItemInHand(new ItemStack(Material.WOOD_HOE, 1));
@@ -32,32 +44,36 @@ public class Quake extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onInteract(final PlayerInteractEvent e) {
-        Location loc = e.getPlayer().getLocation();
+        Location loc = e.getPlayer().getEyeLocation();
 
-        if(e.getAction() == Action.RIGHT_CLICK_AIR) {
-            if(e.getPlayer().getItemInHand().getType() == Material.WOOD_HOE) {
-                if (e.getPlayer().getExp() == 1F)
-                {
-                    WitherSkull bullet = (WitherSkull) e.getPlayer().getWorld().spawnEntity(e.getPlayer().getLocation(), EntityType.WITHER_SKULL);
-                    bullet.setVelocity(e.getPlayer().getLocation().getDirection().multiply(1.5));
-                    bullet.getWorld().playEffect(loc, Effect.SMOKE, 0, 50);
-                    e.getPlayer().playSound(loc, Sound.GHAST_FIREBALL, 100, 0);
-                    e.getPlayer().setExp(0F);
-                }
-            }
+        if((e.getAction() == Action.RIGHT_CLICK_AIR) && (e.getPlayer().getItemInHand().getType() == Material.WOOD_HOE) && (e.getPlayer().getExp() == 1F)) {
+
+            double pitch = ((loc.getPitch() + 90) * Math.PI) / 180;
+            double yaw  = ((loc.getYaw() + 90)  * Math.PI) / 180;
+
+            double x = Math.sin(pitch) * Math.cos(yaw);
+            double y = Math.sin(pitch) * Math.sin(yaw);
+            double z = Math.cos(pitch);
+
+            Vector vector = new Vector(x, z, y).multiply(1.5);
+
+            e.getPlayer().launchProjectile(WitherSkull.class).setVelocity(vector);
+            e.getPlayer().playSound(loc, Sound.GHAST_FIREBALL, 100, 0);
+            e.getPlayer().playEffect(loc, Effect.SMOKE, (Integer) 50);
+            e.getPlayer().setExp(0F);
         }
 
-        //this should have its own section but ill figure that out later
-        Runnable runnable = new Runnable()
-        {
-            @Override
-            public void run(){
-                if (!(e.getPlayer().getExp() == 1F))
-                {
-                    e.getPlayer().setExp(e.getPlayer().getExp() + (1F / (10 * 20)));
-                }
+        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+            public void run() {
+                e.getPlayer().setExp(1F);
             }
-        };
+        }, 40L);
+    }
+
+    @EventHandler
+    public void onEntityExplode(EntityExplodeEvent event)
+    {
+        event.blockList().clear();
     }
 
     @EventHandler
@@ -70,7 +86,7 @@ public class Quake extends JavaPlugin implements Listener {
                 {
                     if (e.getEntity() instanceof Player)
                     {
-                        e.setDamage(20.0);
+                        e.setDamage(30.0);
                     }
                 }
             }
