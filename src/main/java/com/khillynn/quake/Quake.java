@@ -59,11 +59,10 @@ public class Quake extends JavaPlugin implements Listener {
 
             e.getPlayer().launchProjectile(WitherSkull.class).setVelocity(vector);
             e.getPlayer().playSound(loc, Sound.GHAST_FIREBALL, 100, 0);
-            e.getPlayer().playEffect(loc, Effect.SMOKE, (Integer) 50);
             e.getPlayer().setExp(0F);
         }
 
-        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
             public void run() {
                 e.getPlayer().setExp(1F);
             }
@@ -80,15 +79,9 @@ public class Quake extends JavaPlugin implements Listener {
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
         if(e.getEntity() instanceof WitherSkull)
         {
-            if(e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE)
+            if((e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) && (e.getDamager() instanceof WitherSkull) && (e.getEntity() instanceof Player))
             {
-                if (e.getDamager() instanceof WitherSkull)
-                {
-                    if (e.getEntity() instanceof Player)
-                    {
                         e.setDamage(30.0);
-                    }
-                }
             }
         }
     }
