@@ -6,8 +6,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -77,11 +77,10 @@ public class Quake extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
-        if(e.getEntity() instanceof WitherSkull)
+        if(e.getDamager() instanceof WitherSkull)
         {
-            if((e.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) && (e.getDamager() instanceof WitherSkull) && (e.getEntity() instanceof Player))
-            {
-                        e.setDamage(30.0);
+            if(e.getEntity() instanceof  Player){
+                ((Player) e.getEntity()).setHealth(0.0);
             }
         }
     }
