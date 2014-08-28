@@ -7,10 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -43,6 +41,11 @@ public class Quake extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e) {
+        e.getDrops().clear();
+    }
+
+    @EventHandler
     public void onInteract(final PlayerInteractEvent e) {
         Location loc = e.getPlayer().getEyeLocation();
 
@@ -57,16 +60,16 @@ public class Quake extends JavaPlugin implements Listener {
 
             Vector vector = new Vector(x, z, y).multiply(1.5);
 
-            e.getPlayer().launchProjectile(WitherSkull.class).setVelocity(vector);
+            e.getPlayer().launchProjectile(Fireball.class).setVelocity(vector);
             e.getPlayer().playSound(loc, Sound.GHAST_FIREBALL, 100, 0);
             e.getPlayer().setExp(0F);
-        }
 
-        getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-            public void run() {
-                e.getPlayer().setExp(1F);
-            }
-        }, 40L);
+            getServer().getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+                public void run() {
+                    e.getPlayer().setExp(1F);
+                }
+            }, 40L);
+        }
     }
 
     @EventHandler
@@ -77,7 +80,7 @@ public class Quake extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
-        if(e.getDamager() instanceof WitherSkull)
+        if(e.getDamager() instanceof Fireball)
         {
             if(e.getEntity() instanceof  Player){
                 ((Player) e.getEntity()).setHealth(0.0);
