@@ -43,6 +43,7 @@ public class Quake extends JavaPlugin implements Listener {
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent e) {
         e.getDrops().clear();
+        Bukkit.broadcastMessage("[" + ChatColor.GOLD + "Server:" + ChatColor.WHITE + "] " + ChatColor.RED + p.getName() + ChatColor.GRAY + " Has been Killed!");
     }
 
     @EventHandler
